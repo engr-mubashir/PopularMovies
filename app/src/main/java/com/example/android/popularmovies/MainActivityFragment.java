@@ -4,7 +4,7 @@ package com.example.android.popularmovies;
  * Created by Lenovo on 2/4/2017.
  */
 
-
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,22 +30,19 @@ import com.example.android.popularmovies.utilities.JSONUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
 
-
-
 public class MainActivityFragment extends Fragment {
-
     private GridView gridView;
     private MovieDataAdapter movieDataAdapter;
 
     private static final String SORT_SETTING_KEY = "sort_setting";
-    private static final String POPULARITY = "popularity.desc";
-    private static final String RATING = "vote_average.desc";
+    private static final String POPULARITY = "popular";
+    private static final String RATING = "top_rated";
     private static final String MOVIES_KEY = "movies";
     private String sortBy = POPULARITY;
     private ArrayList<JSONUtils> jsonUtils = null;
+    Context context = null;
 
     public MainActivityFragment() {
-
     }
 
     @Override
@@ -53,6 +50,7 @@ public class MainActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // In order to handle menu events.
         setHasOptionsMenu(true);
+        context = getContext();
     }
 
     @Override
@@ -175,9 +173,13 @@ public class MainActivityFragment extends Fragment {
             URL url = NetworkUtils.buildUrl(params[0]);
 
             try {
-                jsonResponse = NetworkUtils.getResponseFromHttpUrl(url);
-                return getDataFromJSON(jsonResponse);
-            } catch (IOException|JSONException e) {
+                if(NetworkUtils.isInternetAvailable(context)) {
+                    jsonResponse = NetworkUtils.getResponseFromHttpUrl(url);
+                    return getDataFromJSON(jsonResponse);
+                }else{
+                    Log.e(TAG, "Internet not available, try again!");
+                }
+            } catch (IOException | JSONException e) {
                 Log.e(TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
